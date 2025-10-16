@@ -2,78 +2,354 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Регистрация в боте</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация в VILQA Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ВАШ ДИЗАЙН ЗДЕСЬ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            padding-bottom: 100px;
         }
-        .form-container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
         }
-        input {
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 15px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        .user-info {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .user-info.visible {
+            display: block;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: white;
+            padding: 14px;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
             font-size: 16px;
+            color: var(--tg-theme-text-color, #000000);
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus {
+            outline: 2px solid var(--tg-theme-button-color, #3390ec);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .radio-option {
+            flex: 1;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-option label {
+            display: block;
+            padding: 14px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .main-button-placeholder {
+            height: 60px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 15px;
+            }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h2>Регистрация в боте</h2>
-        <form id="regForm">
-            <input type="text" name="name" placeholder="Ваше имя" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="tel" name="phone" placeholder="Телефон" required>
-            <button type="submit">Зарегистрироваться</button>
+    <div class="container">
+        <div class="header">
+            <h1>🥗 VILQA</h1>
+            <p>Твой помощник по подсчету калорий</p>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <p><strong>👤 Telegram:</strong> <span id="telegramUser"></span></p>
+            <p><strong>🆔 ID:</strong> <span id="telegramId"></span></p>
+        </div>
+
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Имя *</label>
+                <input type="text" id="name" name="name" required placeholder="Введите ваше имя">
+            </div>
+
+            <div class="form-group">
+                <label>Пол *</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="male" name="gender" value="male" required>
+                        <label for="male">👨 Мужской</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="female" name="gender" value="female" required>
+                        <label for="female">👩 Женский</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-columns">
+                <div class="form-group">
+                    <label for="age">Возраст *</label>
+                    <input type="number" id="age" name="age" required placeholder="лет" min="10" max="120">
+                </div>
+
+                <div class="form-group">
+                    <label for="height">Рост *</label>
+                    <input type="number" id="height" name="height" required placeholder="см" min="100" max="250">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="weight">Вес *</label>
+                <input type="number" id="weight" name="weight" required placeholder="кг" min="30" max="300" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label for="activity">Образ жизни *</label>
+                <select id="activity" name="activity" required>
+                    <option value="">Выберите уровень активности</option>
+                    <option value="1.2">🪑 Сидячий (офис, нет спорта)</option>
+                    <option value="1.375">🚶 Минимальная активность</option>
+                    <option value="1.55">🏃 Умеренная (спорт 3-5 раз/неделю)</option>
+                    <option value="1.725">💪 Высокая (6-7 раз/неделю)</option>
+                    <option value="1.9">🏋️ Очень высокая активность</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="goal">Цель *</label>
+                <select id="goal" name="goal" required>
+                    <option value="">Выберите вашу цель</option>
+                    <option value="lose">⬇️ Похудеть (-500 ккал)</option>
+                    <option value="lose_fast">⬇️⬇️ Быстро похудеть (-750 ккал)</option>
+                    <option value="maintain">➡️ Поддержать вес</option>
+                    <option value="gain">⬆️ Набрать массу (+300 ккал)</option>
+                    <option value="gain_fast">⬆️⬆️ Быстро набрать (+500 ккал)</option>
+                </select>
+            </div>
+
+            <div class="main-button-placeholder"></div>
         </form>
     </div>
 
     <script>
-        document.getElementById('regForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
+        let tg = window.Telegram.WebApp;
+        
+        // Инициализация Web App
+        tg.ready();
+        tg.expand();
+
+        // Получаем данные пользователя из Telegram
+        const user = tg.initDataUnsafe.user;
+        let telegramData = {};
+
+        if (user) {
+            telegramData = {
+                telegram_id: user.id,
+                telegram_username: user.username || '',
+                telegram_first_name: user.first_name || '',
+                telegram_last_name: user.last_name || '',
+                telegram_language: user.language_code || 'ru'
+            };
+
+            // Показываем информацию о пользователе
+            document.getElementById('userInfo').classList.add('visible');
+            document.getElementById('telegramUser').textContent = 
+                `${user.first_name || ''} ${user.last_name || ''} ${user.username ? '@' + user.username : ''}`.trim();
+            document.getElementById('telegramId').textContent = user.id;
+
+            // Автозаполнение имени
+            if (user.first_name) {
+                document.getElementById('name').value = user.first_name;
+            }
+        }
+
+        // Настраиваем главную кнопку Telegram
+        tg.MainButton.setText('Зарегистрироваться');
+        tg.MainButton.show();
+        tg.MainButton.onClick(submitForm);
+
+        // Включение/выключение кнопки в зависимости от валидности формы
+        const form = document.getElementById('registrationForm');
+        form.addEventListener('input', () => {
+            if (form.checkValidity()) {
+                tg.MainButton.enable();
+            } else {
+                tg.MainButton.disable();
+            }
+        });
+
+        // Изначально проверяем форму
+        if (!form.checkValidity()) {
+            tg.MainButton.disable();
+        }
+
+        async function submitForm() {
+            const formData = new FormData(form);
             const data = Object.fromEntries(formData);
+
+            // Добавляем данные Telegram
+            Object.assign(data, telegramData);
             
-            // URL вашего webhook из n8n
-            const webhookUrl = 'https://n8n62244.hostkey.in/webhook/ВАШ_WEBHOOK_ID';
+            // Расчет базового обмена веществ (BMR) по формуле Миффлина-Сан Жеора
+            let bmr;
+            if (data.gender === 'male') {
+                bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) + 5;
+            } else {
+                bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) - 161;
+            }
+            
+            // Расчет суточной нормы калорий с учетом активности
+            let tdee = bmr * parseFloat(data.activity);
+            
+            // Корректировка на основе цели
+            let targetCalories;
+            switch(data.goal) {
+                case 'lose':
+                    targetCalories = tdee - 500;
+                    break;
+                case 'lose_fast':
+                    targetCalories = tdee - 750;
+                    break;
+                case 'maintain':
+                    targetCalories = tdee;
+                    break;
+                case 'gain':
+                    targetCalories = tdee + 300;
+                    break;
+                case 'gain_fast':
+                    targetCalories = tdee + 500;
+                    break;
+                default:
+                    targetCalories = tdee;
+            }
+            
+            // Добавляем рассчитанные данные
+            data.bmr = Math.round(bmr);
+            data.tdee = Math.round(tdee);
+            data.targetCalories = Math.round(targetCalories);
+            data.registrationDate = new Date().toISOString();
+            
+            // Показываем загрузку
+            tg.MainButton.showProgress();
+            
+            // ЗАМЕНИТЕ URL НА ВАШ WEBHOOK ИЗ n8n
+            const webhookUrl = 'https://n8n62244.hostkey.in/webhook/YOUR_WEBHOOK_ID';
             
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify(data)
                 });
                 
                 if (response.ok) {
-                    alert('Регистрация успешна!');
-                    e.target.reset();
+                    // Успешная регистрация
+                    tg.showAlert('✅ Регистрация успешна!', () => {
+                        tg.close();
+                    });
+                } else {
+                    throw new Error('Registration failed');
                 }
             } catch (error) {
-                alert('Ошибка регистрации');
+                console.error('Error:', error);
+                tg.hideProgress();
+                tg.showAlert('❌ Ошибка регистрации. Попробуйте снова.');
             }
-        });
+        }
     </script>
 </body>
 </html>
