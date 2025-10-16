@@ -224,55 +224,69 @@
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        // Проверяем, открыто ли в Telegram
+        let tg = window.Telegram?.WebApp;
+        let isTelegramWebApp = !!tg;
         
-        // Инициализация Web App
-        tg.ready();
-        tg.expand();
-
-        // Получаем данные пользователя из Telegram
-        const user = tg.initDataUnsafe.user;
         let telegramData = {};
 
-        if (user) {
-            telegramData = {
-                telegram_id: user.id,
-                telegram_username: user.username || '',
-                telegram_first_name: user.first_name || '',
-                telegram_last_name: user.last_name || '',
-                telegram_language: user.language_code || 'ru'
-            };
+        if (isTelegramWebApp) {
+            // Инициализация Web App
+            tg.ready();
+            tg.expand();
 
-            // Показываем информацию о пользователе
-            document.getElementById('userInfo').classList.add('visible');
-            document.getElementById('telegramUser').textContent = 
-                `${user.first_name || ''} ${user.last_name || ''} ${user.username ? '@' + user.username : ''}`.trim();
-            document.getElementById('telegramId').textContent = user.id;
+            // Получаем данные пользователя из Telegram
+            const user = tg.initDataUnsafe?.user;
 
-            // Автозаполнение имени
-            if (user.first_name) {
-                document.getElementById('name').value = user.first_name;
+            if (user) {
+                telegramData = {
+                    telegram_id: user.id,
+                    telegram_username: user.username || '',
+                    telegram_first_name: user.first_name || '',
+                    telegram_last_name: user.last_name || '',
+                    telegram_language: user.language_code || 'ru'
+                };
+
+                // Показываем информацию о пользователе
+                document.getElementById('userInfo').classList.add('visible');
+                document.getElementById('telegramUser').textContent = 
+                    `${user.first_name || ''} ${user.last_name || ''} ${user.username ? '@' + user.username : ''}`.trim();
+                document.getElementById('telegramId').textContent = user.id;
+
+                // Автозаполнение имени
+                if (user.first_name) {
+                    document.getElementById('name').value = user.first_name;
+                }
             }
-        }
 
-        // Настраиваем главную кнопку Telegram
-        tg.MainButton.setText('Зарегистрироваться');
-        tg.MainButton.show();
-        tg.MainButton.onClick(submitForm);
+            // Настраиваем главную кнопку Telegram
+            tg.MainButton.setText('Зарегистрироваться');
+            tg.MainButton.show();
+            tg.MainButton.onClick(submitForm);
 
-        // Включение/выключение кнопки в зависимости от валидности формы
-        const form = document.getElementById('registrationForm');
-        form.addEventListener('input', () => {
-            if (form.checkValidity()) {
-                tg.MainButton.enable();
-            } else {
+            // Включение/выключение кнопки в зависимости от валидности формы
+            const form = document.getElementById('registrationForm');
+            form.addEventListener('input', () => {
+                if (form.checkValidity()) {
+                    tg.MainButton.enable();
+                } else {
+                    tg.MainButton.disable();
+                }
+            });
+
+            // Изначально проверяем форму
+            if (!form.checkValidity()) {
                 tg.MainButton.disable();
             }
-        });
-
-        // Изначально проверяем форму
-        if (!form.checkValidity()) {
-            tg.MainButton.disable();
+        } else {
+            // Если открыто в браузере - показываем обычную кнопку
+            const placeholder = document.querySelector('.main-button-placeholder');
+            placeholder.innerHTML = '<button type="submit" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer;">Зарегистрироваться</button>';
+            
+            document.getElementById('registrationForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitForm();
+            });
         }
 
         async function submitForm() {
