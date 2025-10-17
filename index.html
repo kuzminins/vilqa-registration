@@ -411,7 +411,7 @@
             }[data.activity] || data.activity;
             
             try {
-                const response = await fetch('https://n8n.svoidigital.ru/webhook/vilqa-registration', {
+                const response = await fetch('https://n8n.svoidigital.ru/webhook-test/vilqa-registration', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
