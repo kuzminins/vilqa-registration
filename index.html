@@ -398,6 +398,32 @@
             data.targetCalories = Math.round(targetCalories);
             data.registrationDate = new Date().toISOString();
             
+            // Добавляем русские названия
+            const goalNames = {
+                'lose': 'Похудеть',
+                'lose_fast': 'Быстро похудеть',
+                'maintain': 'Поддержать вес',
+                'gain': 'Набрать массу',
+                'gain_fast': 'Быстро набрать массу'
+            };
+            
+            const genderNames = {
+                'male': 'Мужской',
+                'female': 'Женский'
+            };
+            
+            const activityNames = {
+                '1.2': 'Сидячий образ жизни',
+                '1.375': 'Минимальная активность',
+                '1.55': 'Умеренная активность',
+                '1.725': 'Высокая активность',
+                '1.9': 'Очень высокая активность'
+            };
+            
+            data.goalName = goalNames[data.goal] || data.goal;
+            data.genderName = genderNames[data.gender] || data.gender;
+            data.activityName = activityNames[data.activity] || data.activity;
+            
             console.log('Финальные данные для отправки:', data);
             
             // Показываем загрузку
