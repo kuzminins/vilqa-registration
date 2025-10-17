@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VILQA Registration</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,18 +13,25 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            position: fixed;
         }
 
         body {
             font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #F5F7F0;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: 20px;
-            position: relative;
-            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         body::before {
@@ -37,6 +44,7 @@
             background: radial-gradient(circle, rgba(220, 255, 100, 0.3) 0%, transparent 70%);
             border-radius: 50%;
             z-index: 0;
+            pointer-events: none;
         }
 
         body::after {
@@ -49,18 +57,21 @@
             background: radial-gradient(circle, rgba(180, 240, 150, 0.2) 0%, transparent 70%);
             border-radius: 50%;
             z-index: 0;
+            pointer-events: none;
         }
 
         .container {
             background: #FFFFFF;
             border-radius: 32px;
             padding: 48px 40px;
+            padding-bottom: 100px;
             max-width: 480px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
             position: relative;
             z-index: 1;
             animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin: 20px auto;
         }
 
         @keyframes slideUp {
@@ -76,24 +87,26 @@
 
         .logo {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
             position: relative;
         }
 
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
         .logo-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
-            padding: 16px 24px;
-            border-radius: 20px;
-            margin-bottom: 16px;
             font-size: 40px;
-            box-shadow: 0 8px 24px rgba(220, 255, 100, 0.3);
             animation: float 3s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(-3deg); }
-            50% { transform: translateY(-10px) rotate(3deg); }
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
         }
 
         .logo h1 {
@@ -104,12 +117,11 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -2px;
-            margin-bottom: 8px;
         }
 
         .logo p {
             color: #636E72;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
         }
 
@@ -229,6 +241,12 @@
             transform: translateY(-2px);
         }
 
+        .three-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
         .two-columns {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -331,15 +349,12 @@
             }
         }
 
-        .main-button-placeholder {
-            height: 60px;
-        }
-
         .decorative-circle {
             position: absolute;
             border-radius: 50%;
             background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
             opacity: 0.1;
+            pointer-events: none;
         }
 
         .circle-1 {
@@ -358,12 +373,16 @@
 
         @media (max-width: 520px) {
             .container {
-                padding: 36px 28px;
+                padding: 32px 24px 100px;
                 border-radius: 28px;
             }
 
             .logo h1 {
-                font-size: 40px;
+                font-size: 36px;
+            }
+
+            .logo-badge {
+                font-size: 32px;
             }
 
             .two-columns {
@@ -389,8 +408,10 @@
         <div class="decorative-circle circle-2"></div>
 
         <div class="logo">
-            <div class="logo-badge">🥗</div>
-            <h1>VILQA</h1>
+            <div class="logo-header">
+                <span class="logo-badge">🥗</span>
+                <h1>VILQA</h1>
+            </div>
             <p>Начни заботиться о себе</p>
         </div>
 
@@ -400,35 +421,37 @@
                 <input type="text" id="name" name="name" required placeholder="Как тебя зовут?">
             </div>
 
-            <div class="form-group">
-                <label>Пол</label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="male" name="gender" value="male" required>
-                        <label for="male">👨 М</label>
+            <div class="two-columns">
+                <div class="form-group">
+                    <label>Пол</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="male" name="gender" value="male" required>
+                            <label for="male">👨 М</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="female" name="gender" value="female" required>
+                            <label for="female">👩 Ж</label>
+                        </div>
                     </div>
-                    <div class="radio-option">
-                        <input type="radio" id="female" name="gender" value="female" required>
-                        <label for="female">👩 Ж</label>
-                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Возраст</label>
+                    <input type="number" id="age" name="age" required placeholder="27" min="10" max="120">
                 </div>
             </div>
 
             <div class="two-columns">
                 <div class="form-group">
-                    <label for="age">Возраст</label>
-                    <input type="number" id="age" name="age" required placeholder="27" min="10" max="120">
+                    <label for="height">Рост, см</label>
+                    <input type="number" id="height" name="height" required placeholder="184" min="100" max="250">
                 </div>
 
                 <div class="form-group">
-                    <label for="height">Рост</label>
-                    <input type="number" id="height" name="height" required placeholder="184 см" min="100" max="250">
+                    <label for="weight">Вес, кг</label>
+                    <input type="number" id="weight" name="weight" required placeholder="94" min="30" max="300" step="0.1">
                 </div>
-            </div>
-
-            <div class="form-group">
-                <label for="weight">Вес</label>
-                <input type="number" id="weight" name="weight" required placeholder="94 кг" min="30" max="300" step="0.1">
             </div>
 
             <div class="form-group">
@@ -458,8 +481,6 @@
             <button type="submit" class="submit-button" id="browserButton" style="display: none;">
                 Начать путь 🚀
             </button>
-
-            <div class="main-button-placeholder" id="tgButtonPlaceholder" style="display: none;"></div>
         </form>
     </div>
 
@@ -492,8 +513,6 @@
             tg.MainButton.setText('Начать путь 🚀');
             tg.MainButton.show();
             tg.MainButton.onClick(submitForm);
-
-            document.getElementById('tgButtonPlaceholder').style.display = 'block';
 
             const form = document.getElementById('registrationForm');
             form.addEventListener('input', () => {
@@ -574,6 +593,8 @@
             
             const webhookUrl = 'https://n8n.svoidigital.ru/webhook/vilqa-registration';
             
+            console.log('Отправка данных:', data);
+            
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
@@ -581,7 +602,10 @@
                     body: JSON.stringify(data)
                 });
                 
+                console.log('Статус:', response.status);
+                
                 if (response.ok) {
+                    console.log('Успех!');
                     document.getElementById('overlay').classList.add('show');
                     
                     setTimeout(() => {
@@ -591,17 +615,17 @@
                             document.getElementById('overlay').classList.remove('show');
                             form.reset();
                         }
-                    }, 500);
+                    }, 1500);
                 } else {
-                    throw new Error('Registration failed');
+                    throw new Error('Failed');
                 }
             } catch (error) {
                 console.error('Ошибка:', error);
                 if (isTelegramWebApp) {
                     tg.hideProgress();
-                    tg.showAlert('❌ Ошибка регистрации. Попробуйте снова.');
+                    tg.showAlert('❌ Ошибка. Попробуй снова');
                 } else {
-                    alert('❌ Ошибка регистрации. Попробуйте снова.');
+                    alert('❌ Ошибка. Попробуй снова');
                 }
             }
         }
