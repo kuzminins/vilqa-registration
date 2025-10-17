@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация в VILQA Bot</title>
+    <title>VILQA Registration</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,122 +16,167 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--tg-theme-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #000000);
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F5F7F0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            padding-bottom: 100px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(220, 255, 100, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -150px;
+            left: -150px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(180, 240, 150, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
         }
 
         .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            opacity: 0.7;
-            font-size: 14px;
-        }
-
-        .success-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #4caf50;
-            color: white;
-            padding: 30px 40px;
-            border-radius: 20px;
-            font-size: 20px;
-            font-weight: 600;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            z-index: 1000;
-            display: none;
-            text-align: center;
-        }
-
-        .success-message.show {
-            display: block;
-            animation: successPop 0.3s ease;
-        }
-
-        @keyframes successPop {
-            0% {
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 0;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+            background: #FFFFFF;
+            border-radius: 32px;
+            padding: 48px 40px;
+            max-width: 480px;
             width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .overlay.show {
-            display: block;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            padding: 16px 24px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            font-size: 40px;
+            box-shadow: 0 8px 24px rgba(220, 255, 100, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+
+        .logo h1 {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -2px;
+            margin-bottom: 8px;
+        }
+
+        .logo p {
+            color: #636E72;
+            font-size: 16px;
+            font-weight: 500;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 24px;
+            position: relative;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            color: #2D3436;
             font-weight: 600;
             font-size: 15px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
         }
 
         input[type="text"],
         input[type="number"],
         select {
             width: 100%;
-            padding: 14px;
-            border: 1px solid #ddd;
-            background: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: 12px;
-            font-size: 16px;
-            color: var(--tg-theme-text-color, #000000);
-            font-family: inherit;
+            padding: 18px 20px;
+            background: #F8F9FA;
+            border: 2px solid #E9ECEF;
+            border-radius: 16px;
+            color: #2D3436;
+            font-size: 17px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         input:focus,
         select:focus {
-            outline: 2px solid var(--tg-theme-button-color, #3390ec);
-            border-color: var(--tg-theme-button-color, #3390ec);
+            outline: none;
+            background: #FFFFFF;
+            border-color: #DCFF64;
+            box-shadow: 0 0 0 4px rgba(220, 255, 100, 0.2);
+            transform: translateY(-2px);
+        }
+
+        input::placeholder {
+            color: #ADB5BD;
+            font-weight: 400;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%232D3436' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            padding-right: 48px;
+        }
+
+        select option {
+            background: #FFFFFF;
+            color: #2D3436;
+            padding: 12px;
         }
 
         .radio-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .radio-option {
-            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 12px;
         }
 
         .radio-option input[type="radio"] {
@@ -136,164 +184,295 @@
         }
 
         .radio-option label {
-            display: block;
-            padding: 14px;
-            background: var(--tg-theme-secondary-bg-color, #ffffff);
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #F8F9FA;
+            border: 2px solid #E9ECEF;
+            border-radius: 16px;
             cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 17px;
+            font-weight: 600;
+            color: #636E72;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .radio-option label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: -1;
         }
 
         .radio-option input[type="radio"]:checked + label {
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border-color: var(--tg-theme-button-color, #3390ec);
+            border-color: #DCFF64;
+            color: #2D3436;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(220, 255, 100, 0.4);
+        }
+
+        .radio-option input[type="radio"]:checked + label::before {
+            transform: translateY(0);
+        }
+
+        .radio-option label:hover {
+            border-color: #DCFF64;
+            transform: translateY(-2px);
         }
 
         .two-columns {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 16px;
         }
 
         .submit-button {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 22px;
+            background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             font-size: 18px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-top: 32px;
+            box-shadow: 0 12px 32px rgba(45, 52, 54, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            transition: left 0.3s ease;
+            z-index: -1;
         }
 
         .submit-button:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(45, 52, 54, 0.4);
+            color: #2D3436;
+        }
+
+        .submit-button:hover::before {
+            left: 0;
         }
 
         .submit-button:active {
-            transform: translateY(0);
+            transform: translateY(-2px);
+        }
+
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 247, 240, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-overlay.show {
+            display: flex;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            color: #2D3436;
+            padding: 48px 56px;
+            border-radius: 32px;
+            font-size: 32px;
+            font-weight: 700;
+            box-shadow: 0 24px 72px rgba(220, 255, 100, 0.5);
+            animation: successBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            letter-spacing: -1px;
+        }
+
+        @keyframes successBounce {
+            0% {
+                transform: scale(0.5) rotate(-5deg);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.05) rotate(2deg);
+            }
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
         }
 
         .main-button-placeholder {
             height: 60px;
         }
 
-        @media (max-width: 400px) {
-            body {
-                padding: 15px;
+        .decorative-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            opacity: 0.1;
+        }
+
+        .circle-1 {
+            width: 120px;
+            height: 120px;
+            top: -40px;
+            right: -40px;
+        }
+
+        .circle-2 {
+            width: 80px;
+            height: 80px;
+            bottom: 40px;
+            left: -20px;
+        }
+
+        @media (max-width: 520px) {
+            .container {
+                padding: 36px 28px;
+                border-radius: 28px;
+            }
+
+            .logo h1 {
+                font-size: 40px;
             }
 
             .two-columns {
                 grid-template-columns: 1fr;
             }
+
+            .success-message {
+                padding: 36px 44px;
+                font-size: 28px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="overlay" id="overlay"></div>
-    <div class="success-message" id="successMessage">
-        ✅ Регистрация успешна!
+    <div class="success-overlay" id="overlay">
+        <div class="success-message">
+            ✨ Готово!
+        </div>
     </div>
 
     <div class="container">
-        <div class="header">
-            <h1>🥗 VILQA</h1>
-            <p>Твой помощник по подсчету калорий</p>
+        <div class="decorative-circle circle-1"></div>
+        <div class="decorative-circle circle-2"></div>
+
+        <div class="logo">
+            <div class="logo-badge">🥗</div>
+            <h1>VILQA</h1>
+            <p>Начни заботиться о себе</p>
         </div>
 
         <form id="registrationForm">
             <div class="form-group">
-                <label for="name">Имя *</label>
-                <input type="text" id="name" name="name" required placeholder="Введите ваше имя">
+                <label for="name">Имя</label>
+                <input type="text" id="name" name="name" required placeholder="Как тебя зовут?">
             </div>
 
             <div class="form-group">
-                <label>Пол *</label>
+                <label>Пол</label>
                 <div class="radio-group">
                     <div class="radio-option">
                         <input type="radio" id="male" name="gender" value="male" required>
-                        <label for="male">👨 Мужской</label>
+                        <label for="male">👨 М</label>
                     </div>
                     <div class="radio-option">
                         <input type="radio" id="female" name="gender" value="female" required>
-                        <label for="female">👩 Женский</label>
+                        <label for="female">👩 Ж</label>
                     </div>
                 </div>
             </div>
 
             <div class="two-columns">
                 <div class="form-group">
-                    <label for="age">Возраст *</label>
-                    <input type="number" id="age" name="age" required placeholder="лет" min="10" max="120">
+                    <label for="age">Возраст</label>
+                    <input type="number" id="age" name="age" required placeholder="27" min="10" max="120">
                 </div>
 
                 <div class="form-group">
-                    <label for="height">Рост *</label>
-                    <input type="number" id="height" name="height" required placeholder="см" min="100" max="250">
+                    <label for="height">Рост</label>
+                    <input type="number" id="height" name="height" required placeholder="184 см" min="100" max="250">
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="weight">Вес *</label>
-                <input type="number" id="weight" name="weight" required placeholder="кг" min="30" max="300" step="0.1">
+                <label for="weight">Вес</label>
+                <input type="number" id="weight" name="weight" required placeholder="94 кг" min="30" max="300" step="0.1">
             </div>
 
             <div class="form-group">
-                <label for="activity">Образ жизни *</label>
+                <label for="activity">Активность</label>
                 <select id="activity" name="activity" required>
-                    <option value="">Выберите уровень активности</option>
-                    <option value="1.2">🪑 Сидячий (офис, нет спорта)</option>
-                    <option value="1.375">🚶 Минимальная активность</option>
-                    <option value="1.55">🏃 Умеренная (спорт 3-5 раз/неделю)</option>
-                    <option value="1.725">💪 Высокая (6-7 раз/неделю)</option>
-                    <option value="1.9">🏋️ Очень высокая активность</option>
+                    <option value="">Твой образ жизни</option>
+                    <option value="1.2">🪑 Сидячий</option>
+                    <option value="1.375">🚶 Минимальная</option>
+                    <option value="1.55">🏃 Умеренная</option>
+                    <option value="1.725">💪 Высокая</option>
+                    <option value="1.9">🏋️ Очень высокая</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="goal">Цель *</label>
+                <label for="goal">Цель</label>
                 <select id="goal" name="goal" required>
-                    <option value="">Выберите вашу цель</option>
-                    <option value="lose">⬇️ Похудеть (-500 ккал)</option>
-                    <option value="lose_fast">⬇️⬇️ Быстро похудеть (-750 ккал)</option>
-                    <option value="maintain">➡️ Поддержать вес</option>
-                    <option value="gain">⬆️ Набрать массу (+300 ккал)</option>
-                    <option value="gain_fast">⬆️⬆️ Быстро набрать (+500 ккал)</option>
+                    <option value="">Чего хочешь?</option>
+                    <option value="lose">⬇️ Похудеть</option>
+                    <option value="lose_fast">⬇️⬇️ Быстро похудеть</option>
+                    <option value="maintain">➡️ Держать вес</option>
+                    <option value="gain">⬆️ Набрать массу</option>
+                    <option value="gain_fast">⬆️⬆️ Быстро набрать</option>
                 </select>
             </div>
 
-            <!-- Эта кнопка видна только в обычном браузере -->
             <button type="submit" class="submit-button" id="browserButton" style="display: none;">
-                🚀 Зарегистрироваться
+                Начать путь 🚀
             </button>
 
-            <!-- Для Telegram будет использоваться MainButton -->
             <div class="main-button-placeholder" id="tgButtonPlaceholder" style="display: none;"></div>
         </form>
     </div>
 
     <script>
-        // Проверяем, открыто ли в Telegram
         let tg = window.Telegram?.WebApp;
         let isTelegramWebApp = !!tg;
         
         let telegramData = {};
 
         if (isTelegramWebApp) {
-            console.log('Запущено в Telegram Web App');
-            
-            // Инициализация Web App
             tg.ready();
             tg.expand();
 
-            // Получаем данные пользователя из Telegram
             const user = tg.initDataUnsafe?.user;
 
             if (user) {
@@ -305,23 +484,17 @@
                     telegram_language: user.language_code || 'ru'
                 };
 
-                console.log('Данные пользователя:', telegramData);
-
-                // Автозаполнение имени
                 if (user.first_name) {
                     document.getElementById('name').value = user.first_name;
                 }
             }
 
-            // Настраиваем главную кнопку Telegram
-            tg.MainButton.setText('Зарегистрироваться');
+            tg.MainButton.setText('Начать путь 🚀');
             tg.MainButton.show();
             tg.MainButton.onClick(submitForm);
 
-            // Показываем placeholder для кнопки
             document.getElementById('tgButtonPlaceholder').style.display = 'block';
 
-            // Включение/выключение кнопки в зависимости от валидности формы
             const form = document.getElementById('registrationForm');
             form.addEventListener('input', () => {
                 if (form.checkValidity()) {
@@ -331,14 +504,10 @@
                 }
             });
 
-            // Изначально проверяем форму
             if (!form.checkValidity()) {
                 tg.MainButton.disable();
             }
         } else {
-            console.log('Запущено в обычном браузере');
-            
-            // Если открыто в браузере - показываем обычную кнопку
             document.getElementById('browserButton').style.display = 'block';
             
             document.getElementById('registrationForm').addEventListener('submit', (e) => {
@@ -348,18 +517,12 @@
         }
 
         async function submitForm() {
-            console.log('Отправка формы...');
-            
             const form = document.getElementById('registrationForm');
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
 
-            // Добавляем данные Telegram
             Object.assign(data, telegramData);
             
-            console.log('Данные формы:', data);
-            
-            // Расчет базового обмена веществ (BMR) по формуле Миффлина-Сан Жеора
             let bmr;
             if (data.gender === 'male') {
                 bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) + 5;
@@ -367,38 +530,23 @@
                 bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) - 161;
             }
             
-            // Расчет суточной нормы калорий с учетом активности
             let tdee = bmr * parseFloat(data.activity);
             
-            // Корректировка на основе цели
             let targetCalories;
             switch(data.goal) {
-                case 'lose':
-                    targetCalories = tdee - 500;
-                    break;
-                case 'lose_fast':
-                    targetCalories = tdee - 750;
-                    break;
-                case 'maintain':
-                    targetCalories = tdee;
-                    break;
-                case 'gain':
-                    targetCalories = tdee + 300;
-                    break;
-                case 'gain_fast':
-                    targetCalories = tdee + 500;
-                    break;
-                default:
-                    targetCalories = tdee;
+                case 'lose': targetCalories = tdee - 500; break;
+                case 'lose_fast': targetCalories = tdee - 750; break;
+                case 'maintain': targetCalories = tdee; break;
+                case 'gain': targetCalories = tdee + 300; break;
+                case 'gain_fast': targetCalories = tdee + 500; break;
+                default: targetCalories = tdee;
             }
             
-            // Добавляем рассчитанные данные
             data.bmr = Math.round(bmr);
             data.tdee = Math.round(tdee);
             data.targetCalories = Math.round(targetCalories);
             data.registrationDate = new Date().toISOString();
             
-            // Добавляем русские названия
             const goalNames = {
                 'lose': 'Похудеть',
                 'lose_fast': 'Быстро похудеть',
@@ -407,11 +555,7 @@
                 'gain_fast': 'Быстро набрать массу'
             };
             
-            const genderNames = {
-                'male': 'Мужской',
-                'female': 'Женский'
-            };
-            
+            const genderNames = { 'male': 'Мужской', 'female': 'Женский' };
             const activityNames = {
                 '1.2': 'Сидячий образ жизни',
                 '1.375': 'Минимальная активность',
@@ -424,39 +568,28 @@
             data.genderName = genderNames[data.gender] || data.gender;
             data.activityName = activityNames[data.activity] || data.activity;
             
-            console.log('Финальные данные для отправки:', data);
-            
-            // Показываем загрузку
             if (isTelegramWebApp) {
                 tg.MainButton.showProgress();
             }
             
-            const webhookUrl = 'https://n8n.svoidigital.ru/webhook-test/vilqa-registration';
-            
-            console.log('Отправка на:', webhookUrl);
+            const webhookUrl = 'https://n8n.svoidigital.ru/webhook/vilqa-registration';
             
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
-                console.log('Ответ сервера:', response);
-                
                 if (response.ok) {
-                    console.log('Регистрация успешна!');
-                    
-                    // Показываем красивое сообщение об успехе
                     document.getElementById('overlay').classList.add('show');
-                    document.getElementById('successMessage').classList.add('show');
                     
-                    // Закрываем форму через 0.5 секунды
                     setTimeout(() => {
                         if (isTelegramWebApp) {
                             tg.close();
+                        } else {
+                            document.getElementById('overlay').classList.remove('show');
+                            form.reset();
                         }
                     }, 500);
                 } else {
