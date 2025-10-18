@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VILQA Registration</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -14,36 +16,79 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html {
+        html, body {
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            overflow-x: hidden;
             position: fixed;
         }
 
         body {
-            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #F5F7F0;
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(220, 255, 100, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -150px;
+            left: -150px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(180, 240, 150, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
         }
 
         .container {
             background: #FFFFFF;
             border-radius: 32px;
-            padding: 40px 32px;
+            padding: 48px 40px;
+            padding-bottom: 100px;
             max-width: 480px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-            margin: 0 auto 40px;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin: 20px auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .logo {
             text-align: center;
             margin-bottom: 32px;
+            position: relative;
         }
 
         .logo-header {
@@ -56,6 +101,12 @@
 
         .logo-badge {
             font-size: 40px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
         }
 
         .logo h1 {
@@ -64,6 +115,7 @@
             background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             letter-spacing: -2px;
         }
 
@@ -73,50 +125,17 @@
             font-weight: 500;
         }
 
-        .error-message {
-            background: rgba(255, 107, 107, 0.1);
-            border: 2px solid #FF6B6B;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
-            color: #FF6B6B;
-            font-weight: 600;
-            text-align: center;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .debug-info {
-            background: #F8F9FA;
-            border: 2px solid #E9ECEF;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 20px;
-            font-size: 11px;
-            color: #636E72;
-            font-family: monospace;
-            max-height: 150px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .debug-info.show {
-            display: block;
-        }
-
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            position: relative;
         }
 
         label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: #2D3436;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 15px;
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
@@ -125,14 +144,15 @@
         input[type="number"],
         select {
             width: 100%;
-            padding: 16px;
+            padding: 18px 20px;
             background: #F8F9FA;
             border: 2px solid #E9ECEF;
             border-radius: 16px;
             color: #2D3436;
-            font-size: 16px;
+            font-size: 17px;
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         input:focus,
@@ -141,31 +161,56 @@
             background: #FFFFFF;
             border-color: #DCFF64;
             box-shadow: 0 0 0 4px rgba(220, 255, 100, 0.2);
+            transform: translateY(-2px);
         }
 
         form.submitted input:invalid,
-        form.submitted select:invalid {
+        form.submitted select:invalid,
+        form.submitted .radio-group:has(input:invalid) {
             border-color: #FF6B6B;
             background: rgba(255, 107, 107, 0.05);
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        form.submitted input:invalid:focus,
+        form.submitted select:invalid:focus {
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+        }
+
+        input::placeholder {
+            color: #ADB5BD;
+            font-weight: 400;
         }
 
         select {
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%232D3436' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%232D3436' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
+            background-position: right 20px center;
+            padding-right: 48px;
+        }
+
+        select option {
+            background: #FFFFFF;
+            color: #2D3436;
+            padding: 12px;
         }
 
         .radio-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 16px;
+            margin-top: 12px;
         }
 
-        .radio-option input {
+        .radio-option input[type="radio"] {
             display: none;
         }
 
@@ -173,53 +218,103 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 20px;
             background: #F8F9FA;
             border: 2px solid #E9ECEF;
             border-radius: 16px;
             cursor: pointer;
-            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 17px;
             font-weight: 600;
             color: #636E72;
             position: relative;
             overflow: hidden;
         }
 
-        .radio-option input:checked + label {
-            border-color: #DCFF64;
+        .radio-option label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: -1;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            border-color: #DCFF64;
             color: #2D3436;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(220, 255, 100, 0.4);
+        }
+
+        .radio-option input[type="radio"]:checked + label::before {
+            transform: translateY(0);
+        }
+
+        .radio-option label:hover {
+            border-color: #DCFF64;
+            transform: translateY(-2px);
+        }
+
+        .three-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
         }
 
         .two-columns {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 12px !important;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
         .submit-button {
             width: 100%;
-            padding: 20px;
+            padding: 22px;
             background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
             color: white;
             border: none;
             border-radius: 16px;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 24px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-top: 32px;
             box-shadow: 0 12px 32px rgba(45, 52, 54, 0.3);
             text-transform: uppercase;
             letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(45, 52, 54, 0.4);
+            color: #2D3436;
+        }
+
+        .submit-button:hover::before {
+            left: 0;
         }
 
         .submit-button:active {
-            transform: scale(0.98);
-        }
-
-        .submit-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+            transform: translateY(-2px);
         }
 
         .success-overlay {
@@ -229,6 +324,7 @@
             width: 100%;
             height: 100%;
             background: rgba(245, 247, 240, 0.95);
+            backdrop-filter: blur(20px);
             z-index: 999;
             display: none;
             align-items: center;
@@ -237,44 +333,99 @@
 
         .success-overlay.show {
             display: flex;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .success-message {
             background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
             color: #2D3436;
-            padding: 48px;
+            padding: 48px 56px;
             border-radius: 32px;
             font-size: 32px;
             font-weight: 700;
+            box-shadow: 0 24px 72px rgba(220, 255, 100, 0.5);
+            animation: successBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-align: center;
+            letter-spacing: -1px;
         }
 
-        @media (max-width: 400px) {
-            .container {
-                padding: 32px 20px;
+        @keyframes successBounce {
+            0% {
+                transform: scale(0.5) rotate(-5deg);
+                opacity: 0;
             }
-            
+            70% {
+                transform: scale(1.05) rotate(2deg);
+            }
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        .decorative-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .circle-1 {
+            width: 120px;
+            height: 120px;
+            top: -40px;
+            right: -40px;
+        }
+
+        .circle-2 {
+            width: 80px;
+            height: 80px;
+            bottom: 40px;
+            left: -20px;
+        }
+
+        @media (max-width: 520px) {
+            .container {
+                padding: 32px 24px 100px;
+                border-radius: 28px;
+            }
+
             .logo h1 {
                 font-size: 36px;
             }
-            
-            input, select {
-                font-size: 15px;
-                padding: 14px;
+
+            .logo-badge {
+                font-size: 32px;
             }
-            
-            label {
-                font-size: 12px;
+
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .success-message {
+                padding: 36px 44px;
+                font-size: 28px;
             }
         }
     </style>
 </head>
 <body>
     <div class="success-overlay" id="overlay">
-        <div class="success-message">✨ Готово!</div>
+        <div class="success-message">
+            ✨ Готово!
+        </div>
     </div>
 
     <div class="container">
+        <div class="decorative-circle circle-1"></div>
+        <div class="decorative-circle circle-2"></div>
+
         <div class="logo">
             <div class="logo-header">
                 <span class="logo-badge">🥗</span>
@@ -282,9 +433,6 @@
             </div>
             <p>Начни заботиться о себе</p>
         </div>
-
-        <div class="error-message" id="errorMessage"></div>
-        <div class="debug-info" id="debugInfo"></div>
 
         <form id="registrationForm">
             <div class="form-group">
@@ -298,11 +446,11 @@
                     <div class="radio-group">
                         <div class="radio-option">
                             <input type="radio" id="male" name="gender" value="male" required>
-                            <label for="male">👨</label>
+                            <label for="male">👨 М</label>
                         </div>
                         <div class="radio-option">
                             <input type="radio" id="female" name="gender" value="female" required>
-                            <label for="female">👩</label>
+                            <label for="female">👩 Ж</label>
                         </div>
                     </div>
                 </div>
@@ -328,7 +476,7 @@
             <div class="form-group">
                 <label for="activity">Активность</label>
                 <select id="activity" name="activity" required>
-                    <option value="">Выбери</option>
+                    <option value="">Твой образ жизни</option>
                     <option value="1.2">🪑 Сидячий</option>
                     <option value="1.375">🚶 Минимальная</option>
                     <option value="1.55">🏃 Умеренная</option>
@@ -340,7 +488,7 @@
             <div class="form-group">
                 <label for="goal">Цель</label>
                 <select id="goal" name="goal" required>
-                    <option value="">Выбери</option>
+                    <option value="">Чего хочешь?</option>
                     <option value="lose">⬇️ Похудеть</option>
                     <option value="lose_fast">⬇️⬇️ Быстро похудеть</option>
                     <option value="maintain">➡️ Держать вес</option>
@@ -349,101 +497,70 @@
                 </select>
             </div>
 
-            <button type="submit" class="submit-button" id="submitButton">
+            <button type="submit" class="submit-button" id="browserButton" style="display: none;">
                 Начать путь 🚀
             </button>
         </form>
     </div>
 
     <script>
-        // Debug helper
-        function addDebug(msg) {
-            const debugDiv = document.getElementById('debugInfo');
-            const timestamp = new Date().toLocaleTimeString();
-            debugDiv.innerHTML += `[${timestamp}] ${msg}\n`;
-            debugDiv.classList.add('show');
-            console.log(msg);
-        }
-
-        // Telegram WebApp initialization
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tgApp = window.Telegram.WebApp;
-            tgApp.ready();
-            tgApp.expand();
-            
-            try {
-                tgApp.MainButton.hide();
-                tgApp.MainButton.isVisible = false;
-            } catch(e) {
-                addDebug('MainButton error: ' + e.message);
-            }
-            addDebug('Telegram WebApp инициализирован');
-        } else {
-            addDebug('⚠️ Не Telegram WebApp среда');
-        }
-
-        const tg = window.Telegram?.WebApp;
-        const isTelegramWebApp = !!tg;
+        let tg = window.Telegram?.WebApp;
+        let isTelegramWebApp = !!tg;
+        
         let telegramData = {};
 
-        if (isTelegramWebApp && tg.initDataUnsafe?.user) {
-            const user = tg.initDataUnsafe.user;
-            telegramData = {
-                telegram_id: user.id,
-                telegram_username: user.username || '',
-                telegram_first_name: user.first_name || '',
-                telegram_last_name: user.last_name || '',
-                telegram_language: user.language_code || 'ru'
-            };
+        if (isTelegramWebApp) {
+            tg.ready();
+            tg.expand();
 
-            addDebug(`Telegram ID: ${user.id}`);
+            const user = tg.initDataUnsafe?.user;
 
-            if (user.first_name) {
-                document.getElementById('name').value = user.first_name;
+            if (user) {
+                telegramData = {
+                    telegram_id: user.id,
+                    telegram_username: user.username || '',
+                    telegram_first_name: user.first_name || '',
+                    telegram_last_name: user.last_name || '',
+                    telegram_language: user.language_code || 'ru'
+                };
+
+                if (user.first_name) {
+                    document.getElementById('name').value = user.first_name;
+                }
+            }
+
+            tg.MainButton.setText('Начать путь 🚀');
+            tg.MainButton.show();
+            tg.MainButton.onClick(submitForm);
+
+            const form = document.getElementById('registrationForm');
+            form.addEventListener('input', () => {
+                if (form.checkValidity()) {
+                    tg.MainButton.enable();
+                } else {
+                    tg.MainButton.disable();
+                }
+            });
+
+            if (!form.checkValidity()) {
+                tg.MainButton.disable();
             }
         } else {
-            addDebug('⚠️ Telegram данные недоступны, используется тестовый режим');
-            // Тестовые данные для разработки
-            telegramData = {
-                telegram_id: 123456789,
-                telegram_username: 'test_user',
-                telegram_first_name: 'Test',
-                telegram_last_name: 'User',
-                telegram_language: 'ru'
-            };
+            document.getElementById('browserButton').style.display = 'block';
+            
+            document.getElementById('registrationForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitForm();
+            });
         }
 
-        const form = document.getElementById('registrationForm');
-        const submitButton = document.getElementById('submitButton');
-        const errorMessage = document.getElementById('errorMessage');
-
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.classList.add('show');
-            addDebug('❌ Ошибка: ' + message);
-            setTimeout(() => {
-                errorMessage.classList.remove('show');
-            }, 5000);
-        }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            form.classList.add('submitted');
-            
-            if (!form.checkValidity()) {
-                showError('❗ Заполни все поля');
-                return;
-            }
-            
-            submitButton.disabled = true;
-            submitButton.textContent = 'Отправка...';
-            addDebug('Начинаем отправку формы...');
-            
+        async function submitForm() {
+            const form = document.getElementById('registrationForm');
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
+
             Object.assign(data, telegramData);
             
-            // Расчёт BMR и TDEE
             let bmr;
             if (data.gender === 'male') {
                 bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) + 5;
@@ -451,7 +568,7 @@
                 bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) - 161;
             }
             
-            const tdee = bmr * parseFloat(data.activity);
+            let tdee = bmr * parseFloat(data.activity);
             
             let targetCalories;
             switch(data.goal) {
@@ -468,60 +585,69 @@
             data.targetCalories = Math.round(targetCalories);
             data.registrationDate = new Date().toISOString();
             
-            addDebug(`BMR: ${data.bmr}, TDEE: ${data.tdee}, Target: ${data.targetCalories}`);
+            const goalNames = {
+                'lose': 'Похудеть',
+                'lose_fast': 'Быстро похудеть',
+                'maintain': 'Поддержать вес',
+                'gain': 'Набрать массу',
+                'gain_fast': 'Быстро набрать массу'
+            };
+            
+            const genderNames = { 'male': 'Мужской', 'female': 'Женский' };
+            const activityNames = {
+                '1.2': 'Сидячий образ жизни',
+                '1.375': 'Минимальная активность',
+                '1.55': 'Умеренная активность',
+                '1.725': 'Высокая активность',
+                '1.9': 'Очень высокая активность'
+            };
+            
+            data.goalName = goalNames[data.goal] || data.goal;
+            data.genderName = genderNames[data.gender] || data.gender;
+            data.activityName = activityNames[data.activity] || data.activity;
+            
+            if (isTelegramWebApp) {
+                tg.MainButton.showProgress();
+            }
             
             const webhookUrl = 'https://n8n.svoidigital.ru/webhook/vilqa-registration';
-            addDebug(`Отправка на: ${webhookUrl}`);
-            addDebug(`Данные: ${JSON.stringify(data, null, 2)}`);
+            
+            console.log('Отправка данных:', data);
             
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data),
-                    mode: 'cors'
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
                 });
                 
-                addDebug(`Response status: ${response.status} ${response.statusText}`);
-                
-                const contentType = response.headers.get('content-type');
-                addDebug(`Response content-type: ${contentType}`);
-                
-                let responseData;
-                if (contentType && contentType.includes('application/json')) {
-                    responseData = await response.json();
-                } else {
-                    responseData = await response.text();
-                }
-                
-                addDebug(`Response body: ${JSON.stringify(responseData)}`);
+                console.log('Статус:', response.status);
                 
                 if (response.ok) {
-                    addDebug('✅ Успешная отправка!');
+                    console.log('Успех!');
                     document.getElementById('overlay').classList.add('show');
+                    
                     setTimeout(() => {
                         if (isTelegramWebApp) {
                             tg.close();
                         } else {
-                            location.reload();
+                            document.getElementById('overlay').classList.remove('show');
+                            form.reset();
                         }
                     }, 1500);
                 } else {
-                    throw new Error(`Server error ${response.status}: ${JSON.stringify(responseData)}`);
+                    throw new Error('Failed');
                 }
             } catch (error) {
-                addDebug(`❌ Fetch error: ${error.message}`);
-                console.error('Полная ошибка:', error);
-                showError('❌ Ошибка отправки: ' + error.message);
-                submitButton.disabled = false;
-                submitButton.textContent = 'Начать путь 🚀';
+                console.error('Ошибка:', error);
+                if (isTelegramWebApp) {
+                    tg.hideProgress();
+                    tg.showAlert('❌ Ошибка. Попробуй снова');
+                } else {
+                    alert('❌ Ошибка. Попробуй снова');
+                }
             }
-        });
-
-        addDebug('✅ Скрипт загружен успешно');
+        }
     </script>
 </body>
 </html>
