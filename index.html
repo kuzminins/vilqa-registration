@@ -100,11 +100,7 @@
             font-family: monospace;
             max-height: 150px;
             overflow-y: auto;
-            display: none;
-        }
-
-        .debug-info.show {
-            display: block;
+            display: none !important;
         }
 
         .form-group {
@@ -211,6 +207,13 @@
             box-shadow: 0 12px 32px rgba(45, 52, 54, 0.3);
             text-transform: uppercase;
             letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .submit-button.ready {
+            background: linear-gradient(135deg, #DCFF64 0%, #B4F064 100%);
+            color: #2D3436;
+            box-shadow: 0 12px 32px rgba(220, 255, 100, 0.4);
         }
 
         .submit-button:active {
@@ -289,7 +292,7 @@
         <form id="registrationForm">
             <div class="form-group">
                 <label for="name">Имя</label>
-                <input type="text" id="name" name="name" required placeholder="Андрей">
+                <input type="text" id="name" name="name" required placeholder="Введите имя">
             </div>
 
             <div class="two-columns">
@@ -309,14 +312,14 @@
 
                 <div class="form-group">
                     <label for="age">Возраст</label>
-                    <input type="number" id="age" name="age" required placeholder="25" min="10" max="120">
+                    <input type="number" id="age" name="age" required placeholder="18" min="10" max="120">
                 </div>
             </div>
 
             <div class="two-columns">
                 <div class="form-group">
                     <label for="height">Рост, см</label>
-                    <input type="number" id="height" name="height" required placeholder="175" min="100" max="250">
+                    <input type="number" id="height" name="height" required placeholder="170" min="100" max="250">
                 </div>
 
                 <div class="form-group">
@@ -328,7 +331,7 @@
             <div class="form-group">
                 <label for="activity">Активность</label>
                 <select id="activity" name="activity" required>
-                    <option value="">Выбери</option>
+                    <option value="">Выберите уровень активности</option>
                     <option value="1.2">🪑 Сидячий</option>
                     <option value="1.375">🚶 Минимальная</option>
                     <option value="1.55">🏃 Умеренная</option>
@@ -340,7 +343,7 @@
             <div class="form-group">
                 <label for="goal">Цель</label>
                 <select id="goal" name="goal" required>
-                    <option value="">Выбери</option>
+                    <option value="">Выберите вашу цель</option>
                     <option value="lose">⬇️ Похудеть</option>
                     <option value="lose_fast">⬇️⬇️ Быстро похудеть</option>
                     <option value="maintain">➡️ Держать вес</option>
@@ -426,6 +429,35 @@
             }, 5000);
         }
 
+        // Проверка заполненности всех полей
+        function checkFormValidity() {
+            const name = document.getElementById('name').value.trim();
+            const gender = document.querySelector('input[name="gender"]:checked');
+            const age = document.getElementById('age').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const activity = document.getElementById('activity').value;
+            const goal = document.getElementById('goal').value;
+
+            // Все поля заполнены?
+            if (name && gender && age && height && weight && activity && goal) {
+                submitButton.classList.add('ready');
+            } else {
+                submitButton.classList.remove('ready');
+            }
+        }
+
+        // Слушаем изменения во всех полях
+        document.getElementById('name').addEventListener('input', checkFormValidity);
+        document.getElementById('age').addEventListener('input', checkFormValidity);
+        document.getElementById('height').addEventListener('input', checkFormValidity);
+        document.getElementById('weight').addEventListener('input', checkFormValidity);
+        document.getElementById('activity').addEventListener('change', checkFormValidity);
+        document.getElementById('goal').addEventListener('change', checkFormValidity);
+        document.querySelectorAll('input[name="gender"]').forEach(radio => {
+            radio.addEventListener('change', checkFormValidity);
+        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             form.classList.add('submitted');
@@ -475,14 +507,19 @@
             addDebug(`Данные: ${JSON.stringify(data, null, 2)}`);
             
             try {
+                // Сначала проверим доступность через простой запрос
+                addDebug('Проверка доступности вебхука...');
+                
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(data),
-                    mode: 'cors'
+                    body: JSON.stringify(data)
+                }).catch(err => {
+                    addDebug('Fetch failed: ' + err.message);
+                    throw new Error('Не удалось связаться с сервером. Возможные причины:\n1. Workflow не активен\n2. Проблема с CORS\n3. Неправильный URL');
                 });
                 
                 addDebug(`Response status: ${response.status} ${response.statusText}`);
