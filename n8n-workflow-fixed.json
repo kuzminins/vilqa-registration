@@ -125,35 +125,6 @@
       "position": [860, 420],
       "id": "response-error",
       "name": "Response Error"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict"
-          },
-          "conditions": [
-            {
-              "id": "error-check",
-              "leftValue": "={{ $json.error }}",
-              "rightValue": "",
-              "operator": {
-                "type": "object",
-                "operation": "notExists"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [1060, 360],
-      "id": "check-errors",
-      "name": "Check for Errors"
     }
   ],
   "connections": {
@@ -194,25 +165,7 @@
       "main": [
         [
           {
-            "node": "Check for Errors",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check for Errors": {
-      "main": [
-        [
-          {
             "node": "Response Success",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Response Error",
             "type": "main",
             "index": 0
           }
