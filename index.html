@@ -352,6 +352,9 @@
                 </select>
             </div>
 
+            <!-- Скрытое поле для определения timezone -->
+            <input type="hidden" id="timezone" name="timezone" value="">
+
             <button type="submit" class="submit-button" id="submitButton">
                 Начать путь 🚀
             </button>
@@ -367,6 +370,15 @@
             debugDiv.classList.add('show');
             console.log(msg);
         }
+
+        // Автоматическое определение timezone пользователя
+        document.addEventListener('DOMContentLoaded', function() {
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById('timezone').value = userTimezone;
+
+            console.log('User timezone:', userTimezone); // Для отладки
+            addDebug('Timezone: ' + userTimezone);
+        });
 
         // Telegram WebApp initialization
         if (window.Telegram && window.Telegram.WebApp) {
