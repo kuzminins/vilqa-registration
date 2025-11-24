@@ -63,8 +63,8 @@
     },
     {
       "parameters": {
-        "chatId": "={{ $json.body.telegram_id }}",
-        "text": "={{ $json.message }}",
+        "chatId": "={{ $('Prepare Welcome Message').item.json.body.telegram_id }}",
+        "text": "={{ $('Prepare Welcome Message').item.json.message }}",
         "additionalFields": {
           "appendAttribution": false,
           "parse_mode": "MarkdownV2"
@@ -85,7 +85,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \n  \"success\": true, \n  \"message\": \"Регистрация успешна\",\n  \"user_id\": $json.body.telegram_id,\n  \"timestamp\": $now\n} }}",
+        "responseBody": "={{ { \n  \"success\": true, \n  \"message\": \"Регистрация успешна\",\n  \"user_id\": $('Prepare Welcome Message').item.json.body.telegram_id,\n  \"timestamp\": $now\n} }}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
