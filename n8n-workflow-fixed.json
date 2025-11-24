@@ -1,0 +1,227 @@
+{
+  "name": "VILQA Registration (Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vilqa-registration",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [460, 240],
+      "id": "webhook-registration",
+      "name": "Webhook - Registration"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Получаем данные из webhook\nconst body = $input.first().json.body;\n\n// Валидация обязательных полей\nif (!body.telegram_id) {\n  throw new Error('Missing telegram_id');\n}\n\nif (!body.name || !body.gender || !body.age || !body.height || !body.weight || !body.activity || !body.goal) {\n  throw new Error('Missing required fields');\n}\n\n// Функции для форматирования сообщения\nfunction escapeMarkdown(text) {\n  const specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];\n  let escaped = String(text);\n  specialChars.forEach(char => {\n    escaped = escaped.replace(new RegExp('\\\\' + char, 'g'), '\\\\' + char);\n  });\n  return escaped;\n}\n\nfunction getGoalFriendly(goal) {\n  const goals = {\n    'lose': 'сбросить вес',\n    'lose_fast': 'быстро сбросить вес',\n    'maintain': 'сохранить форму',\n    'gain': 'набрать массу',\n    'gain_fast': 'быстро набрать массу'\n  };\n  return goals[goal] || 'достичь цели';\n}\n\nfunction getGoalEmoji(goal) {\n  const emojis = {\n    'lose': '📉',\n    'lose_fast': '⚡',\n    'maintain': '⚖️',\n    'gain': '📈',\n    'gain_fast': '💪'\n  };\n  return emojis[goal] || '🎯';\n}\n\nfunction getMotivation(goal) {\n  const motivations = {\n    'lose': '🌱 *Здоровый темп:* примерно 2 кг в месяц',\n    'lose_fast': '⚡ *Активный темп:* около 3 кг в месяц',\n    'maintain': '⚖️ *Баланс:* стабильный вес и отличное самочувствие',\n    'gain': '💪 *Качественный рост:* около 1 кг мышц в месяц',\n    'gain_fast': '🚀 *Быстрый рост:* около 2 кг в месяц с тренировками'\n  };\n  return motivations[goal] || '🎯 *Главное — постоянство\\\\!*';\n}\n\n// Формируем безопасные значения для Markdown\nconst safeName = escapeMarkdown(body.name);\nconst safeHeight = escapeMarkdown(body.height);\nconst safeWeight = escapeMarkdown(body.weight);\nconst safeAge = escapeMarkdown(body.age);\nconst safeTdee = escapeMarkdown(body.tdee);\nconst safeTargetCal = escapeMarkdown(body.targetCalories);\nconst safeTimezone = body.timezone || 'UTC';\n\n// Собираем приветственное сообщение\nconst greeting = `👋 *Привет, ${safeName}\\\\!*\\n\\nДобро пожаловать в VILQA — твой персональный помощник по питанию`;\nconst goalSection = `\\n\\n${getGoalEmoji(body.goal)} *Твоя цель:* ${getGoalFriendly(body.goal)}`;\nconst statsSection = `\\n\\n📊 *Твои параметры:*\\n• Рост: *${safeHeight}* см\\n• Вес: *${safeWeight}* кг\\n• Возраст: *${safeAge}* лет\\n• Расход: \\\\~*${safeTdee}* ккал/день`;\nconst recommendationSection = `\\n\\n🎯 *Рекомендация:*\\nДля достижения цели съедай около *${safeTargetCal} ккал* в день`;\nconst motivationSection = `\\n\\n${getMotivation(body.goal)}`;\nconst instructionSection = `\\n\\n💬 *Как пользоваться?*\\nПросто пиши мне что ешь, а я посчитаю калории\\\\!\\n\\nНапример: _\"Овсянка 50г, банан, кофе с молоком\"_`;\n\nconst message = greeting + goalSection + statsSection + recommendationSection + motivationSection + instructionSection;\n\n// Возвращаем данные для следующих нод\nreturn {\n  json: {\n    body: body,\n    message: message,\n    timezone: safeTimezone\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 240],
+      "id": "prepare-message",
+      "name": "Prepare Welcome Message"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "ExVPrqR3ZTz2hAge",
+          "mode": "list",
+          "cachedResultName": "users"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $json.body.telegram_id }}",
+            "username": "={{ $json.body.telegram_username }}",
+            "name": "={{ $json.body.name }}",
+            "height": "={{ $json.body.height }}",
+            "weight": "={{ $json.body.weight }}",
+            "age": "={{ $json.body.age }}",
+            "gender": "={{ $json.body.gender }}",
+            "activity_level": "={{ $json.body.activity }}",
+            "daily_calories": "={{ $json.body.targetCalories }}",
+            "daily_protein": "={{ Math.round($json.body.targetCalories * 0.3 / 4) }}",
+            "daily_fats": "={{ Math.round($json.body.targetCalories * 0.25 / 9) }}",
+            "daily_carbs": "={{ Math.round($json.body.targetCalories * 0.45 / 4) }}",
+            "tdee": "={{ $json.body.tdee }}",
+            "timezone": "={{ $json.timezone || 'UTC' }}",
+            "current_state": "active",
+            "state_data": ""
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [860, 240],
+      "id": "insert-user",
+      "name": "Insert New User"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.body.telegram_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "MarkdownV2"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1060, 240],
+      "id": "send-telegram",
+      "name": "Send Welcome Message",
+      "credentials": {
+        "telegramApi": {
+          "id": "ddIRTQugzxvbO2sC",
+          "name": "VILQA AI bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \n  \"success\": true, \n  \"message\": \"Регистрация успешна\",\n  \"user_id\": $json.body.telegram_id,\n  \"timestamp\": $now\n} }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [1260, 240],
+      "id": "response-success",
+      "name": "Response Success"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \n  \"success\": false, \n  \"error\": $json.error?.message || $('Webhook - Registration').item.json.body?.error || 'Unknown error',\n  \"timestamp\": $now\n} }}",
+        "options": {
+          "responseCode": 500,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [860, 420],
+      "id": "response-error",
+      "name": "Response Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "error-check",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notExists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1060, 360],
+      "id": "check-errors",
+      "name": "Check for Errors"
+    }
+  ],
+  "connections": {
+    "Webhook - Registration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Welcome Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Welcome Message": {
+      "main": [
+        [
+          {
+            "node": "Insert New User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert New User": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Message": {
+      "main": [
+        [
+          {
+            "node": "Check for Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Errors": {
+      "main": [
+        [
+          {
+            "node": "Response Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
