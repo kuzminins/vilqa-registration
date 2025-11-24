@@ -532,7 +532,7 @@
                 const data = Object.fromEntries(formData);
                 Object.assign(data, telegramData);
 
-                // Проверка наличия gender перед расчетом BMR
+                // Проверка наличия gender перед отправкой
                 if (!data.gender || (data.gender !== 'male' && data.gender !== 'female')) {
                     showError('❗ Пожалуйста, выберите пол');
                     submitButton.disabled = false;
@@ -540,32 +540,8 @@
                     return;
                 }
 
-                // Расчёт BMR и TDEE
-                let bmr;
-                if (data.gender === 'male') {
-                    bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) + 5;
-                } else {
-                    bmr = 10 * parseFloat(data.weight) + 6.25 * parseFloat(data.height) - 5 * parseFloat(data.age) - 161;
-                }
-
-                const tdee = bmr * parseFloat(data.activity);
-
-                let targetCalories;
-                switch(data.goal) {
-                    case 'lose': targetCalories = tdee - 500; break;
-                    case 'lose_fast': targetCalories = tdee - 750; break;
-                    case 'maintain': targetCalories = tdee; break;
-                    case 'gain': targetCalories = tdee + 300; break;
-                    case 'gain_fast': targetCalories = tdee + 500; break;
-                    default: targetCalories = tdee;
-                }
-
-                data.bmr = Math.round(bmr);
-                data.tdee = Math.round(tdee);
-                data.targetCalories = Math.round(targetCalories);
                 data.registrationDate = new Date().toISOString();
-
-                addDebug(`BMR: ${data.bmr}, TDEE: ${data.tdee}, Target: ${data.targetCalories}`);
+                addDebug(`Отправка данных: name=${data.name}, gender=${data.gender}, age=${data.age}`);
 
                 const webhookUrl = 'https://n8n.svoidigital.ru/webhook-test/vilqa-registration';
                 addDebug(`Отправка на: ${webhookUrl}`);
