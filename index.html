@@ -591,17 +591,41 @@
                     const contentType = response.headers.get('content-type');
                     addDebug(`Response content-type: ${contentType}`);
 
-                    let responseData;
-                    if (contentType && contentType.includes('application/json')) {
-                        responseData = await response.json();
-                    } else {
-                        responseData = await response.text();
-                    }
+                    let responseData = null;
+                    let responseText = '';
 
-                    addDebug(`Response body: ${JSON.stringify(responseData)}`);
+                    try {
+                        // Сначала получаем текст ответа
+                        responseText = await response.text();
+                        addDebug(`Response body (raw): ${responseText}`);
+
+                        // Если ответ пустой
+                        if (!responseText || responseText.trim() === '') {
+                            addDebug('⚠️ Сервер вернул пустой ответ');
+                            responseData = { empty: true };
+                        } else {
+                            // Пытаемся распарсить как JSON
+                            try {
+                                responseData = JSON.parse(responseText);
+                                addDebug(`Response body (parsed): ${JSON.stringify(responseData)}`);
+                            } catch (jsonError) {
+                                addDebug(`⚠️ Ответ не является валидным JSON: ${jsonError.message}`);
+                                responseData = { text: responseText };
+                            }
+                        }
+                    } catch (readError) {
+                        addDebug(`❌ Ошибка чтения ответа: ${readError.message}`);
+                        responseData = { error: 'Failed to read response' };
+                    }
 
                     if (response.ok) {
                         addDebug('✅ Успешная отправка!');
+
+                        // Проверяем что данные действительно сохранились
+                        if (responseText.trim() === '') {
+                            addDebug('⚠️ ВНИМАНИЕ: Пустой ответ от сервера - возможно данные не сохранились!');
+                        }
+
                         document.getElementById('overlay').classList.add('show');
                         setTimeout(() => {
                             if (isTelegramWebApp && tg) {
