@@ -103,28 +103,6 @@
       "position": [1260, 240],
       "id": "response-success",
       "name": "Response Success"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { \n  \"success\": false, \n  \"error\": $json.error?.message || $('Webhook - Registration').item.json.body?.error || 'Unknown error',\n  \"timestamp\": $now\n} }}",
-        "options": {
-          "responseCode": 500,
-          "responseHeaders": {
-            "entries": [
-              {
-                "name": "Content-Type",
-                "value": "application/json; charset=utf-8"
-              }
-            ]
-          }
-        }
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
-      "position": [860, 420],
-      "id": "response-error",
-      "name": "Response Error"
     }
   ],
   "connections": {
