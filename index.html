@@ -543,7 +543,7 @@
                 data.registrationDate = new Date().toISOString();
                 addDebug(`Отправка данных: name=${data.name}, gender=${data.gender}, age=${data.age}`);
 
-                const webhookUrl = 'https://n8n.svoidigital.ru/webhook-test/vilqa-registration';
+                const webhookUrl = 'https://n8n.svoidigital.ru/webhook/vilqa-registration';
                 addDebug(`Отправка на: ${webhookUrl}`);
                 addDebug(`Данные: ${JSON.stringify(data, null, 2)}`);
 
