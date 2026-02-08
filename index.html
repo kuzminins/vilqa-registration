@@ -366,96 +366,264 @@
     </div>
 
     <script>
-document.addEventListener('DOMContentLoaded', function () {
+        // Debug helper с защитой от undefined
+        function addDebug(msg) {
+            const debugDiv = document.getElementById('debugInfo');
+            if (!debugDiv) {
+                console.log('[Debug not ready]', msg);
+                return;
+            }
+            const timestamp = new Date().toLocaleTimeString();
+            debugDiv.innerHTML += `[${timestamp}] ${msg}\n`;
+            debugDiv.classList.add('show');
+            console.log(msg);
+        }
 
-  const tg = window.Telegram?.WebApp;
-  const isTelegramWebApp = !!tg;
+        // Вся инициализация в DOMContentLoaded для предотвращения race conditions
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebug('✅ DOM загружен, начинаем инициализацию');
 
-  if (tg) {
-    tg.ready();
-    tg.expand();
-    try { tg.MainButton.hide(); } catch {}
-  }
+            // Автоматическое определение timezone с fallback
+            try {
+                const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                document.getElementById('timezone').value = userTimezone || 'UTC';
+                addDebug('Timezone: ' + (userTimezone || 'UTC (fallback)'));
+            } catch (e) {
+                // Fallback для старых браузеров
+                const offset = -new Date().getTimezoneOffset() / 60;
+                document.getElementById('timezone').value = `UTC${offset >= 0 ? '+' : ''}${offset}`;
+                addDebug('Timezone: UTC' + offset + ' (fallback по offset)');
+            }
 
-  const form = document.getElementById('registrationForm');
-  const submitButton = document.getElementById('submitButton');
-  const errorMessage = document.getElementById('errorMessage');
-  const overlay = document.getElementById('overlay');
+            // Telegram WebApp initialization
+            const tg = window.Telegram?.WebApp;
+            const isTelegramWebApp = !!(tg && window.Telegram);
+            let telegramData = {};
 
-  function showError(msg) {
-    errorMessage.textContent = msg;
-    errorMessage.classList.add('show');
-    setTimeout(() => errorMessage.classList.remove('show'), 4000);
-  }
+            if (isTelegramWebApp) {
+                tg.ready();
+                tg.expand();
 
-  // timezone
-  try {
-    document.getElementById('timezone').value =
-      Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  } catch {
-    document.getElementById('timezone').value = 'UTC';
-  }
+                try {
+                    tg.MainButton.hide();
+                    tg.MainButton.isVisible = false;
+                } catch(e) {
+                    addDebug('MainButton error: ' + e.message);
+                }
+                addDebug('Telegram WebApp инициализирован');
 
-  // Telegram user
-  let telegramData = {};
-  if (isTelegramWebApp && tg.initDataUnsafe?.user) {
-    const u = tg.initDataUnsafe.user;
-    telegramData = {
-      telegram_id: u.id,
-      telegram_username: u.username || '',
-      telegram_first_name: u.first_name || '',
-      telegram_last_name: u.last_name || '',
-      telegram_language: u.language_code || 'ru'
-    };
-    if (u.first_name) {
-      document.getElementById('name').value = u.first_name;
-    }
-  }
+                // Получаем данные пользователя из Telegram
+                if (tg.initDataUnsafe?.user) {
+                    const user = tg.initDataUnsafe.user;
+                    telegramData = {
+                        telegram_id: user.id,
+                        telegram_username: user.username || '',
+                        telegram_first_name: user.first_name || '',
+                        telegram_last_name: user.last_name || '',
+                        telegram_language: user.language_code || 'ru'
+                    };
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    form.classList.add('submitted');
+                    addDebug(`Telegram ID: ${user.id}`);
 
-    if (!form.checkValidity()) {
-      showError('❗ Заполните все поля корректно');
-      return;
-    }
+                    // Автозаполнение имени
+                    if (user.first_name) {
+                        document.getElementById('name').value = user.first_name;
+                    }
+                } else {
+                    addDebug('⚠️ Telegram user данные недоступны');
+                }
+            } else {
+                addDebug('⚠️ Не Telegram WebApp среда, используется тестовый режим');
+                // Тестовые данные для разработки
+                telegramData = {
+                    telegram_id: 123456789,
+                    telegram_username: 'test_user',
+                    telegram_first_name: 'Test',
+                    telegram_last_name: 'User',
+                    telegram_language: 'ru'
+                };
+            }
 
-    submitButton.disabled = true;
-    submitButton.textContent = 'Отправка...';
+            const form = document.getElementById('registrationForm');
+            const submitButton = document.getElementById('submitButton');
+            const errorMessage = document.getElementById('errorMessage');
 
-    const data = Object.fromEntries(new FormData(form));
-    Object.assign(data, telegramData);
-    data.registrationDate = new Date().toISOString();
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.add('show');
+                addDebug('❌ Ошибка: ' + message);
+                setTimeout(() => {
+                    errorMessage.classList.remove('show');
+                }, 5000);
+            }
 
-    const webhookUrl = 'https://n8n.svoidigital.ru/webhook/vilqa-registration';
+            // Проверка заполненности всех полей
+            function checkFormValidity() {
+                const name = document.getElementById('name').value.trim();
+                const gender = document.querySelector('input[name="gender"]:checked');
+                const age = document.getElementById('age').value;
+                const height = document.getElementById('height').value;
+                const weight = document.getElementById('weight').value;
+                const activity = document.getElementById('activity').value;
+                const goal = document.getElementById('goal').value;
 
-    // 🔥 ВАЖНО: fire-and-forget
-    fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    }).catch(() => {
-      // только если вообще нет сети
-      showError('❌ Не удалось отправить данные');
-      submitButton.disabled = false;
-      submitButton.textContent = 'Начать путь 🚀';
-    });
+                // Все поля заполнены?
+                if (name && gender && age && height && weight && activity && goal) {
+                    submitButton.classList.add('ready');
+                } else {
+                    submitButton.classList.remove('ready');
+                }
+            }
 
-    // ✅ UX: сразу показываем успех и закрываем
-    overlay.classList.add('show');
+            // Вызываем проверку после автозаполнения
+            checkFormValidity();
 
-    setTimeout(() => {
-      if (isTelegramWebApp && tg) {
-        tg.close();
-      } else {
-        location.reload();
-      }
-    }, 200);
-  });
+            // Слушаем изменения во всех полях
+            document.getElementById('name').addEventListener('input', checkFormValidity);
+            document.getElementById('age').addEventListener('input', checkFormValidity);
+            document.getElementById('height').addEventListener('input', checkFormValidity);
+            document.getElementById('weight').addEventListener('input', checkFormValidity);
+            document.getElementById('activity').addEventListener('change', checkFormValidity);
+            document.getElementById('goal').addEventListener('change', checkFormValidity);
+            document.querySelectorAll('input[name="gender"]').forEach(radio => {
+                radio.addEventListener('change', checkFormValidity);
+            });
 
-});
-</script>
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                form.classList.add('submitted');
 
+                // Улучшенная валидация с конкретными сообщениями
+                if (!form.checkValidity()) {
+                    // Находим первое невалидное поле и показываем конкретную ошибку
+                    const name = document.getElementById('name').value.trim();
+                    const gender = document.querySelector('input[name="gender"]:checked');
+                    const age = document.getElementById('age').value;
+                    const height = document.getElementById('height').value;
+                    const weight = document.getElementById('weight').value;
+                    const activity = document.getElementById('activity').value;
+                    const goal = document.getElementById('goal').value;
+
+                    if (!name) {
+                        showError('❗ Укажите ваше имя');
+                    } else if (!gender) {
+                        showError('❗ Выберите пол');
+                    } else if (!age) {
+                        showError('❗ Укажите возраст');
+                    } else if (!height) {
+                        showError('❗ Укажите рост');
+                    } else if (!weight) {
+                        showError('❗ Укажите вес');
+                    } else if (!activity) {
+                        showError('❗ Выберите уровень активности');
+                    } else if (!goal) {
+                        showError('❗ Выберите вашу цель');
+                    } else {
+                        showError('❗ Заполните все поля корректно');
+                    }
+                    return;
+                }
+
+                submitButton.disabled = true;
+                submitButton.textContent = 'Отправка...';
+                addDebug('Начинаем отправку формы...');
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                Object.assign(data, telegramData);
+
+                // Проверка наличия gender перед отправкой
+                if (!data.gender || (data.gender !== 'male' && data.gender !== 'female')) {
+                    showError('❗ Пожалуйста, выберите пол');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Начать путь 🚀';
+                    return;
+                }
+
+                data.registrationDate = new Date().toISOString();
+                addDebug(`Отправка данных: name=${data.name}, gender=${data.gender}, age=${data.age}`);
+
+                const webhookUrl = 'https://n8n.svoidigital.ru/webhook/vilqa-registration';
+                addDebug(`Отправка на: ${webhookUrl}`);
+                addDebug(`Данные: ${JSON.stringify(data, null, 2)}`);
+
+                try {
+                    addDebug('Проверка доступности вебхука...');
+
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    }).catch(err => {
+                        addDebug('Fetch failed: ' + err.message);
+                        throw new Error('Не удалось связаться с сервером. Возможные причины:\n1. Workflow не активен\n2. Проблема с CORS\n3. Неправильный URL');
+                    });
+
+                    addDebug(`Response status: ${response.status} ${response.statusText}`);
+
+                    const contentType = response.headers.get('content-type');
+                    addDebug(`Response content-type: ${contentType}`);
+
+                    let responseData = null;
+                    let responseText = '';
+
+                    try {
+                        // Сначала получаем текст ответа
+                        responseText = await response.text();
+                        addDebug(`Response body (raw): ${responseText}`);
+
+                        // Если ответ пустой
+                        if (!responseText || responseText.trim() === '') {
+                            addDebug('⚠️ Сервер вернул пустой ответ');
+                            responseData = { empty: true };
+                        } else {
+                            // Пытаемся распарсить как JSON
+                            try {
+                                responseData = JSON.parse(responseText);
+                                addDebug(`Response body (parsed): ${JSON.stringify(responseData)}`);
+                            } catch (jsonError) {
+                                addDebug(`⚠️ Ответ не является валидным JSON: ${jsonError.message}`);
+                                responseData = { text: responseText };
+                            }
+                        }
+                    } catch (readError) {
+                        addDebug(`❌ Ошибка чтения ответа: ${readError.message}`);
+                        responseData = { error: 'Failed to read response' };
+                    }
+
+                    if (response.ok) {
+                        addDebug('✅ Успешная отправка!');
+
+                        // Проверяем что данные действительно сохранились
+                        if (responseText.trim() === '') {
+                            addDebug('⚠️ ВНИМАНИЕ: Пустой ответ от сервера - возможно данные не сохранились!');
+                        }
+
+                        document.getElementById('overlay').classList.add('show');
+                        setTimeout(() => {
+                            if (isTelegramWebApp && tg) {
+                                tg.close();
+                            } else {
+                                location.reload();
+                            }
+                        }, 1500);
+                    } else {
+                        throw new Error(`Server error ${response.status}: ${JSON.stringify(responseData)}`);
+                    }
+                } catch (error) {
+                    addDebug(`❌ Fetch error: ${error.message}`);
+                    console.error('Полная ошибка:', error);
+                    showError('❌ Ошибка отправки: ' + error.message);
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Начать путь 🚀';
+                }
+            });
+
+            addDebug('✅ Инициализация завершена');
+        });
+    </script>
 </body>
 </html>
