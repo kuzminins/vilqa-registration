@@ -563,6 +563,17 @@
                 addDebug(`Отправка на: ${webhookUrl}`);
                 addDebug('Данные подготовлены к отправке');
 
+                function finishSuccess() {
+                    document.getElementById('overlay').classList.add('show');
+                    setTimeout(() => {
+                        if (isTelegramWebApp && tg) {
+                            tg.close();
+                        } else {
+                            location.reload();
+                        }
+                    }, 300);
+                }
+
                 try {
                     addDebug('Проверка доступности вебхука...');
 
@@ -579,56 +590,28 @@
                     });
 
                     addDebug(`Response status: ${response.status} ${response.statusText}`);
-
-                    const contentType = response.headers.get('content-type');
-                    addDebug(`Response content-type: ${contentType}`);
-
-                    let responseData = null;
-                    let responseText = '';
-
-                    try {
-                        // Сначала получаем текст ответа
-                        responseText = await response.text();
-                        addDebug(`Response body (raw): ${responseText}`);
-
-                        // Если ответ пустой
-                        if (!responseText || responseText.trim() === '') {
-                            addDebug('⚠️ Сервер вернул пустой ответ');
-                            responseData = { empty: true };
-                        } else {
-                            // Пытаемся распарсить как JSON
-                            try {
-                                responseData = JSON.parse(responseText);
-                                addDebug(`Response body (parsed): ${JSON.stringify(responseData)}`);
-                            } catch (jsonError) {
-                                addDebug(`⚠️ Ответ не является валидным JSON: ${jsonError.message}`);
-                                responseData = { text: responseText };
-                            }
+                    if (!response.ok) {
+                        let responseBody = '';
+                        try {
+                            responseBody = await response.text();
+                        } catch (e) {
+                            addDebug('Не удалось прочитать тело ошибки: ' + e.message);
                         }
-                    } catch (readError) {
-                        addDebug(`❌ Ошибка чтения ответа: ${readError.message}`);
-                        responseData = { error: 'Failed to read response' };
+                        throw new Error(`Server error ${response.status}: ${responseBody || 'empty response'}`);
                     }
 
-                    if (response.ok) {
-                        addDebug('✅ Успешная отправка!');
+                    addDebug('✅ Успешная отправка!');
 
-                        // Проверяем что данные действительно сохранились
-                        if (responseText.trim() === '') {
-                            addDebug('⚠️ ВНИМАНИЕ: Пустой ответ от сервера - возможно данные не сохранились!');
-                        }
-
-                        document.getElementById('overlay').classList.add('show');
-                        setTimeout(() => {
-                            if (isTelegramWebApp && tg) {
-                                tg.close();
-                            } else {
-                                location.reload();
-                            }
-                        }, 1500);
-                    } else {
-                        throw new Error(`Server error ${response.status}: ${JSON.stringify(responseData)}`);
+                    // В debug-режиме читаем ответ асинхронно, не блокируя UI.
+                    if (DEBUG_MODE) {
+                        response.clone().text().then((raw) => {
+                            addDebug(`Response body (raw): ${raw || '[empty]'}`);
+                        }).catch((err) => {
+                            addDebug(`Ошибка чтения debug-ответа: ${err.message}`);
+                        });
                     }
+
+                    finishSuccess();
                 } catch (error) {
                     addDebug(`❌ Fetch error: ${error.message}`);
                     console.error('Полная ошибка:', error);
