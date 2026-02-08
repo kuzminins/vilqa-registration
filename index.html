@@ -212,6 +212,10 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .submit-button.ready {
@@ -227,6 +231,27 @@
         .submit-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .submit-button.is-loading::before {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #FFFFFF;
+            border-radius: 50%;
+            animation: button-spin 0.7s linear infinite;
+        }
+
+        .submit-button.ready.is-loading::before {
+            border: 2px solid rgba(45, 52, 54, 0.25);
+            border-top-color: #2D3436;
+        }
+
+        @keyframes button-spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .success-overlay {
@@ -251,9 +276,21 @@
             color: #2D3436;
             padding: 48px;
             border-radius: 32px;
+            text-align: center;
+        }
+
+        .success-title {
             font-size: 32px;
             font-weight: 700;
-            text-align: center;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .success-subtitle {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2D3436;
+            opacity: 0.85;
         }
 
         @media (max-width: 400px) {
@@ -278,7 +315,10 @@
 </head>
 <body>
     <div class="success-overlay" id="overlay">
-        <div class="success-message">✨ Готово!</div>
+        <div class="success-message">
+            <div class="success-title">Готово!</div>
+            <div class="success-subtitle">Продолжим в чате!</div>
+        </div>
     </div>
 
     <div class="container">
@@ -442,6 +482,14 @@
             const form = document.getElementById('registrationForm');
             const submitButton = document.getElementById('submitButton');
             const errorMessage = document.getElementById('errorMessage');
+            const submitDefaultText = 'Начать путь 🚀';
+
+            function setSubmitLoading(isLoading) {
+                submitButton.disabled = isLoading;
+                submitButton.classList.toggle('is-loading', isLoading);
+                submitButton.textContent = isLoading ? 'Отправка...' : submitDefaultText;
+                submitButton.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+            }
 
             function showError(message) {
                 errorMessage.textContent = message;
@@ -540,8 +588,7 @@
                     return;
                 }
 
-                submitButton.disabled = true;
-                submitButton.textContent = 'Отправка...';
+                setSubmitLoading(true);
                 addDebug('Начинаем отправку формы...');
 
                 const formData = new FormData(form);
@@ -551,8 +598,7 @@
                 // Проверка наличия gender перед отправкой
                 if (!data.gender || (data.gender !== 'male' && data.gender !== 'female')) {
                     showError('❗ Пожалуйста, выберите пол');
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Начать путь 🚀';
+                    setSubmitLoading(false);
                     return;
                 }
 
@@ -616,8 +662,7 @@
                     addDebug(`❌ Fetch error: ${error.message}`);
                     console.error('Полная ошибка:', error);
                     showError('❌ Ошибка отправки: ' + error.message);
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Начать путь 🚀';
+                    setSubmitLoading(false);
                 }
             });
 
