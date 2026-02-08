@@ -366,8 +366,11 @@
     </div>
 
     <script>
-        // Debug helper с защитой от undefined
+        // Debug helper: в проде выключен по умолчанию, можно включить ?debug=1
+        const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
+
         function addDebug(msg) {
+            if (!DEBUG_MODE) return;
             const debugDiv = document.getElementById('debugInfo');
             if (!debugDiv) {
                 console.log('[Debug not ready]', msg);
@@ -433,15 +436,7 @@
                     addDebug('⚠️ Telegram user данные недоступны');
                 }
             } else {
-                addDebug('⚠️ Не Telegram WebApp среда, используется тестовый режим');
-                // Тестовые данные для разработки
-                telegramData = {
-                    telegram_id: 123456789,
-                    telegram_username: 'test_user',
-                    telegram_first_name: 'Test',
-                    telegram_last_name: 'User',
-                    telegram_language: 'ru'
-                };
+                addDebug('⚠️ Не Telegram WebApp среда');
             }
 
             const form = document.getElementById('registrationForm');
@@ -461,14 +456,30 @@
             function checkFormValidity() {
                 const name = document.getElementById('name').value.trim();
                 const gender = document.querySelector('input[name="gender"]:checked');
-                const age = document.getElementById('age').value;
-                const height = document.getElementById('height').value;
-                const weight = document.getElementById('weight').value;
+                const ageEl = document.getElementById('age');
+                const heightEl = document.getElementById('height');
+                const weightEl = document.getElementById('weight');
                 const activity = document.getElementById('activity').value;
                 const goal = document.getElementById('goal').value;
 
-                // Все поля заполнены?
-                if (name && gender && age && height && weight && activity && goal) {
+                const age = ageEl.value;
+                const height = heightEl.value;
+                const weight = weightEl.value;
+                const isTelegramContextValid = isTelegramWebApp && !!telegramData.telegram_id;
+                const isValid =
+                    !!name &&
+                    !!gender &&
+                    !!age &&
+                    !!height &&
+                    !!weight &&
+                    !!activity &&
+                    !!goal &&
+                    ageEl.checkValidity() &&
+                    heightEl.checkValidity() &&
+                    weightEl.checkValidity() &&
+                    isTelegramContextValid;
+
+                if (isValid) {
                     submitButton.classList.add('ready');
                 } else {
                     submitButton.classList.remove('ready');
@@ -524,6 +535,11 @@
                     return;
                 }
 
+                if (!isTelegramWebApp || !telegramData.telegram_id) {
+                    showError('❌ Форму можно отправить только из Telegram');
+                    return;
+                }
+
                 submitButton.disabled = true;
                 submitButton.textContent = 'Отправка...';
                 addDebug('Начинаем отправку формы...');
@@ -545,7 +561,7 @@
 
                 const webhookUrl = 'https://n8n.svoidigital.ru/webhook/vilqa-registration';
                 addDebug(`Отправка на: ${webhookUrl}`);
-                addDebug(`Данные: ${JSON.stringify(data, null, 2)}`);
+                addDebug('Данные подготовлены к отправке');
 
                 try {
                     addDebug('Проверка доступности вебхука...');
